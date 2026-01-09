@@ -11,7 +11,7 @@ It scans multiple HTML elements: `<a>`, `<img>`, `<script>`, `<iframe>`, and `<l
 Before running the script, make sure you have installed the required libraries:
 
 ```bash
-pip install requests beautifulsoup4
+pip install -r requirements.txt
 ```
 
 ## Usage
