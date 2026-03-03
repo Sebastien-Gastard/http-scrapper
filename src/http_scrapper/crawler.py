@@ -73,5 +73,5 @@ class Crawler:
                         self.links_404.append((url, full_url))
                     continue
 
-                if not parsed.path.endswith(".js"):
+                if not parsed.path.endswith((".js", ".svg")):
                     self.crawl(full_url, base_url)
