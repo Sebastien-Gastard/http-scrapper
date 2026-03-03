@@ -1,4 +1,5 @@
 import argparse
+import time
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -11,13 +12,27 @@ def main():
         description="Crawl a website and extract HTTP links."
     )
     parser.add_argument("start_url", help="Starting URL for the crawl")
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=10,
+        help="Number of concurrent threads (default: 10)",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=30,
+        help="Timeout in seconds per HTTP request (default: 30)",
+    )
     args = parser.parse_args()
 
     print("Starting crawl...\n")
     start_url = args.start_url
 
-    crawler = Crawler()
+    start_time = time.monotonic()
+    crawler = Crawler(max_workers=args.threads, timeout=args.timeout)
     crawler.crawl(start_url, start_url)
+    elapsed = time.monotonic() - start_time
 
     # Generate dynamic filenames
     domain = urlparse(start_url).netloc.replace(".", "_")
@@ -25,7 +40,8 @@ def main():
     filename_http = f"http_links_{domain}_{timestamp}.csv"
     filename_404 = f"404_links_{domain}_{timestamp}.csv"
 
-    print("\nCrawl complete.")
+    minutes, seconds = divmod(int(elapsed), 60)
+    print(f"\nCrawl complete in {minutes}m {seconds}s.")
     save_to_csv_http(filename_http, crawler.http_links)
     print(
         f"\n{len(crawler.http_links)} HTTP links found. "

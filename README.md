@@ -25,6 +25,12 @@ pip install -e .
 
 ```bash
 python -m http_scrapper https://www.example.com
+
+# Use custom thread count (default: 10)
+python -m http_scrapper https://www.example.com --threads 20
+
+# Use custom timeout per request in seconds (default: 30)
+python -m http_scrapper https://www.example.com --timeout 60
 ```
 
 Or via the installed console script:
@@ -50,9 +56,11 @@ CSV files use semicolon delimiters and UTF-8 BOM encoding for Excel compatibilit
 
 ## Features
 
+- Multithreaded crawling with configurable thread count (`--threads`, default 10)
 - Recursive crawling within the same domain
 - Fragment URL deduplication
-- 5-second timeout per request
+- Configurable timeout per request (`--timeout`, default 30s)
+- Chrome-like `User-Agent` header to avoid being blocked
 - Real-time progress display with page counter
 
 ## Project Structure

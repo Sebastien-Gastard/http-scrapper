@@ -63,7 +63,7 @@ class TestExtractLinksAndResources:
 
 
 class TestCrawl:
-    @patch("http_scrapper.crawler.requests.get")
+    @patch("requests.Session.get")
     def test_crawl_records_http_links(self, mock_get):
         html = '<html><body><a href="http://insecure.com/page">Link</a></body></html>'
         mock_response = MagicMock()
@@ -81,7 +81,7 @@ class TestCrawl:
             "http://insecure.com/page",
         )
 
-    @patch("http_scrapper.crawler.requests.get")
+    @patch("requests.Session.get")
     def test_crawl_skips_visited(self, mock_get):
         html = "<html><body></body></html>"
         mock_response = MagicMock()
@@ -96,11 +96,11 @@ class TestCrawl:
 
         assert crawler.page_counter == 1
 
-    @patch("http_scrapper.crawler.requests.get")
+    @patch("requests.Session.get")
     def test_crawl_records_404_links(self, mock_get):
         html = '<html><body><a href="https://example.com/broken">Link</a></body></html>'
 
-        def side_effect(url, timeout=5):
+        def side_effect(url, timeout=30):
             resp = MagicMock()
             if url == "https://example.com/broken":
                 resp.raise_for_status.side_effect = requests.RequestException("404")
@@ -120,3 +120,18 @@ class TestCrawl:
             "https://example.com",
             "https://example.com/broken",
         )
+
+    @patch("requests.Session.get")
+    def test_crawl_with_max_workers(self, mock_get):
+        html = '<html><body><a href="http://insecure.com/page">Link</a></body></html>'
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.text = html
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        crawler = Crawler(max_workers=2)
+        crawler.crawl("https://example.com", "https://example.com")
+
+        assert len(crawler.http_links) == 1
+        assert crawler.page_counter == 1
