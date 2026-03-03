@@ -1,39 +1,52 @@
 # http-scrapper
 
-This Python script recursively crawls a website and:
-- Extracts all links using the insecure `http://` protocol
+A Python CLI tool that recursively crawls a website and:
+- Detects all links using the insecure `http://` protocol
 - Detects broken links (404 errors)
 
 It scans multiple HTML elements: `<a>`, `<img>`, `<script>`, `<iframe>`, and `<link>`.
 
-## Prerequisites
-
-Before running the script, make sure you have installed the required libraries:
+## Installation
 
 ```bash
-pip install -r requirements.txt
+# Clone the repository
+git clone https://github.com/<your-user>/http-scrapper.git
+cd http-scrapper
+
+# Create and activate a virtualenv
+python -m venv env
+source env/bin/activate
+
+# Install the package
+pip install -e .
 ```
 
 ## Usage
 
-Run the script with a target URL:
+```bash
+python -m http_scrapper https://www.example.com
+```
+
+Or via the installed console script:
 
 ```bash
-python http_crawler_404_check.py https://www.example.com
+http-scrapper https://www.example.com
 ```
 
 ## Output
 
-The script generates two CSV files with timestamped names:
+Two timestamped CSV files are generated in the current directory:
 
-- `liens_http_{domain}_{timestamp}.csv` - All HTTP links found (source page and HTTP link)
-- `liens_404_{domain}_{timestamp}.csv` - All broken links found (source page and 404 link)
+- `http_links_{domain}_{timestamp}.csv` — all HTTP links found (source page + HTTP link)
+- `404_links_{domain}_{timestamp}.csv` — all broken links found (source page + 404 link)
 
-Example output files:
+Example:
 ```
-liens_http_www_example_com_20231215-1430.csv
-liens_404_www_example_com_20231215-1430.csv
+http_links_www_example_com_20250303-1430.csv
+404_links_www_example_com_20250303-1430.csv
 ```
+
+CSV files use semicolon delimiters and UTF-8 BOM encoding for Excel compatibility.
 
 ## Features
 
@@ -41,4 +54,43 @@ liens_404_www_example_com_20231215-1430.csv
 - Fragment URL deduplication
 - 5-second timeout per request
 - Real-time progress display with page counter
-- CSV output with semicolon delimiter (Excel-compatible)
+
+## Project Structure
+
+```
+src/http_scrapper/
+├── __init__.py
+├── __main__.py      # python -m entry point
+├── cli.py           # Argparse CLI + orchestration
+├── crawler.py       # Crawler class (crawl, link extraction, domain check)
+└── export.py        # CSV export functions
+tests/
+├── test_crawler.py  # Unit tests for the crawler
+└── test_export.py   # Unit tests for CSV export
+```
+
+## Development
+
+```bash
+# Install with dev dependencies (ruff, pytest, pytest-cov)
+pip install -e ".[dev]"
+
+# Lint & format
+ruff check .
+ruff format .
+
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov
+```
+
+## CI/CD
+
+A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs automatically on every push and pull request to `main`:
+
+| Job    | Steps                                  |
+|--------|----------------------------------------|
+| **lint**  | `ruff check .` + `ruff format --check .` |
+| **test**  | `pytest --cov` on Python 3.13          |
